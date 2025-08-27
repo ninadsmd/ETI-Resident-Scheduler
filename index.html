@@ -1,4 +1,4 @@
-{<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="en">
 <head>
@@ -12,7 +12,6 @@
             box-sizing: border-box;
         }
 
-```
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -539,22 +538,12 @@
     .admin-status.active {
         display: block;
     }
-        .nav-buttons {
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .calendar-grid {
-            font-size: 0.9rem;
-        }
-        
-        .calendar-day {
-            min-height: 80px;
-            padding: 5px;
-        }
+    @media (max-width: 768px) {
+        .nav-buttons { flex-direction: column; align-items: center; }
+        .calendar-grid { font-size: 0.9rem; }
+        .calendar-day { min-height: 80px; padding: 5px; }
     }
 </style>
-```
 
 </head>
 <body>
@@ -565,14 +554,12 @@
         <div class="header">
             <h1>ETI Senior Elective and Mini Fellowship Schedule</h1>
             <div class="nav-buttons">
-                <button class="nav-btn active" onclick="showPage('request')">Request Shifts</button>
-                <button class="nav-btn" onclick="showPage('pending')">Pending Approval</button>
-                <button class="nav-btn" onclick="showPage('schedule')">Approved Schedule</button>
+                <button class="nav-btn active" onclick="showPage('request', this)">Request Shifts</button>
+                <button class="nav-btn" onclick="showPage('pending', this)">Pending Approval</button>
+                <button class="nav-btn" onclick="showPage('schedule', this)">Approved Schedule</button>
                 <button class="nav-btn admin-toggle" onclick="toggleAdminMode()">Admin Mode: OFF</button>
             </div>
         </div>
-
-```
     <div class="content">
         <!-- Request Shifts Page -->
         <div id="request-page" class="page active">
@@ -722,7 +709,7 @@
     let isAdminMode = false;
 
     // Admin security variables
-    const ADMIN_PIN = '2904'; // Only changeable in GitHub code
+    const ADMIN_PIN = '1234';
     let failedAttempts = 0;
     let lockoutUntil = null;
     let adminSessionStart = null;
@@ -751,37 +738,31 @@
 
     // Initialize the app
     function init() {
-fetch('YOUR_SCRIPT_URL_HERE')
-        .then(res => res.json())
-        .then(data => {
+        setupEventListeners();
+        fetch("https://api.sheetbest.com/sheets/a3e58e30-2dc3-4a51-a5b5-47fed1cb7c0d")
+          .then(res => res.json())
+          .then(data => {
+            shifts = {};
+            pendingShifts = {};
             data.forEach(entry => {
-                const target = entry.Status === 'Approved' ? shifts : pendingShifts;
-                if (!target[entry.Date]) target[entry.Date] = [];
-                target[entry.Date].push({
-                    resident: entry['Resident Name'],
-                    type: entry['Resident Type'],
-                    shift: entry['Shift Type']
-                });
+                const target = entry.status === 'Approved' ? shifts : pendingShifts;
+                if (!target[entry.date]) target[entry.date] = [];
+                target[entry.date].push({ resident: entry.resident, type: entry.type, shift: entry.shift });
             });
-
             generateCalendar();
             generatePendingCalendar();
             generateScheduleCalendar();
-        })
-        .catch(console.error);
-    generateCalendar();
-        generatePendingCalendar();
-        generateScheduleCalendar();
-        setupEventListeners();
+          })
+          .catch(err => console.error('Failed to load shifts from Google Sheet:', err));
     }
 
     // Navigation functions
-    function showPage(page) {
+    function showPage(page, btn) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-btn:not(.admin-toggle)').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.nav-btn:not(.admin-toggle)').forEach(b => b.classList.remove('active'));
         
         document.getElementById(`${page}-page`).classList.add('active');
-        event.target.classList.add('active');
+        if (btn) btn.classList.add('active');
         
         updateAdminNotice();
     }
@@ -1296,6 +1277,9 @@ function saveShift() {
     })
     .then(res => res.json())
     .then(response => {
+        const target = newShift.status === "Approved" ? shifts : pendingShifts;
+        if (!target[selectedDate]) target[selectedDate] = [];
+        target[selectedDate].push({ resident: residentName, type: residentType, shift: selectedShift });
         alert("Shift submitted!");
         generateCalendar();
         generatePendingCalendar();
@@ -1441,30 +1425,9 @@ function saveShift() {
     // Initialize the app when page loads
     document.addEventListener('DOMContentLoaded', init);
 
-// Load shifts from Sheet.best and populate the calendars
-fetch("https://api.sheetbest.com/sheets/a3e58e30-2dc3-4a51-a5b5-47fed1cb7c0d")
-  .then(res => res.json())
-  .then(data => {
-      data.forEach(entry => {
-          const target = entry.status === "Approved" ? shifts : pendingShifts;
-          if (!target[entry.date]) target[entry.date] = [];
-          target[entry.date].push({
-              resident: entry.resident,
-              type: entry.type,
-              shift: entry.shift
-          });
-      });
-
-      generateCalendar();           // self-scheduling calendar
-      generatePendingCalendar();    // admin pending approval tab
-      generateScheduleCalendar();   // public calendar of approved shifts
-  })
-  .catch(error => {
-      console.error("Failed to load shifts from Google Sheet:", error);
-  });
+// Initial data load is handled in init()
 
 </script>
-```
 
 </body>
 </html>
