@@ -1269,6 +1269,7 @@ fetch('YOUR_SCRIPT_URL_HERE')
         modal.classList.add('active');
     }
 
+
 function saveShift() {
     const residentName = document.getElementById('resident-name').value.trim();
     const residentType = document.getElementById('resident-type').value;
@@ -1278,16 +1279,20 @@ function saveShift() {
         return;
     }
 
-    const formData = new FormData();
-    formData.append("date", selectedDate);
-    formData.append("resident", residentName);
-    formData.append("type", residentType);
-    formData.append("shift", selectedShift);
-    formData.append("status", isAdminMode ? "Approved" : "Pending");
+    const newShift = {
+        date: selectedDate,
+        resident: residentName,
+        type: residentType,
+        shift: selectedShift,
+        status: isAdminMode ? "Approved" : "Pending"
+    };
 
-    fetch("https://script.google.com/macros/s/AKfycbwO2kPk2EXSe1YP-QCl7e95EpOIO_r_WoscfI1YUWD4XMrLJbgWSZEhQm_XX1dk2eB0/exec", {
+    fetch("https://api.sheetbest.com/sheets/a3e58e30-2dc3-4a51-a5b5-47fed1cb7c0d", {
         method: "POST",
-        body: formData
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newShift)
     })
     .then(res => res.json())
     .then(response => {
