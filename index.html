@@ -1337,26 +1337,39 @@ function saveShift() {
     }
 
     // Approval functions
-    function approveShift(dateKey, shiftIndex) {
-        event.stopPropagation();
-        const shift = pendingShifts[dateKey][shiftIndex];
-        
-        // Move from pending to approved
-        if (!shifts[dateKey]) {
-            shifts[dateKey] = [];
-        }
-        shifts[dateKey].push(shift);
-        
-        // Remove from pending
-        pendingShifts[dateKey].splice(shiftIndex, 1);
-        if (pendingShifts[dateKey].length === 0) {
-            delete pendingShifts[dateKey];
-        }
-        
-        generateCalendar();
+    function approveShift(date, index) {
+    const shift = pendingShifts[date][index];
+
+    // Update status in Google Sheet via PATCH
+    fetch(`https://api.sheetbest.com/sheets/a3e58e30-2dc3-4a51-a5b5-47fed1cb7c0d`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            date: date,
+            resident: shift.resident,
+            type: shift.type,
+            shift: shift.shift,
+            status: "Approved"
+        })
+    })
+    .then(res => res.json())
+    .then(() => {
+        // Move the shift from pending to approved in memory
+        if (!shifts[date]) shifts[date] = [];
+        shifts[date].push(shift);
+        pendingShifts[date].splice(index, 1);
+        if (pendingShifts[date].length === 0) delete pendingShifts[date];
+
         generatePendingCalendar();
         generateScheduleCalendar();
-    }
+    })
+    .catch(error => {
+        alert("Failed to approve shift.");
+        console.error(error);
+    });
+}
 
     function rejectShift(dateKey, shiftIndex) {
         event.stopPropagation();
