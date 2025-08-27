@@ -1269,43 +1269,39 @@ fetch('YOUR_SCRIPT_URL_HERE')
         modal.classList.add('active');
     }
 
-    function saveShift() {
-        const residentName = document.getElementById('resident-name').value.trim();
-        const residentType = document.getElementById('resident-type').value;
+function saveShift() {
+    const residentName = document.getElementById('resident-name').value.trim();
+    const residentType = document.getElementById('resident-type').value;
 
-        if (!residentName || !residentType || !selectedShift) {
-            alert('Please complete all fields.');
-            return;
-        }
-
-        const newShift = {
-            date: selectedDate,
-            resident: residentName,
-            type: residentType,
-            shift: selectedShift,
-            status: isAdminMode ? 'Approved' : 'Pending'
-        };
-
-        fetch('https://script.google.com/macros/s/AKfycbwO2kPk2EXSe1YP-QCl7e95EpOIO_r_WoscfI1YUWD4XMrLJbgWSZEhQm_XX1dk2eB0/exec', {
-            method: 'POST',
-            body: JSON.stringify(newShift),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(res => res.json())
-        .then(response => {
-            alert('Shift submitted!');
-            generateCalendar();
-            generatePendingCalendar();
-            generateScheduleCalendar();
-            closeModal();
-        })
-        .catch(err => {
-            alert('Error submitting shift.');
-            console.error(err);
-        });
+    if (!residentName || !residentType || !selectedShift) {
+        alert('Please complete all fields.');
+        return;
     }
+
+    const formData = new FormData();
+    formData.append("date", selectedDate);
+    formData.append("resident", residentName);
+    formData.append("type", residentType);
+    formData.append("shift", selectedShift);
+    formData.append("status", isAdminMode ? "Approved" : "Pending");
+
+    fetch("https://script.google.com/macros/s/AKfycbwO2kPk2EXSe1YP-QCl7e95EpOIO_r_WoscfI1YUWD4XMrLJbgWSZEhQm_XX1dk2eB0/exec", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(response => {
+        alert("Shift submitted!");
+        generateCalendar();
+        generatePendingCalendar();
+        generateScheduleCalendar();
+        closeModal();
+    })
+    .catch(err => {
+        alert("Error submitting shift.");
+        console.error(err);
+    });
+}
 
     function deleteShift() {
         if (confirm('Are you sure you want to delete this shift?')) {
