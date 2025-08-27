@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shift Scheduler</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script defer src="app.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <h1>Shift Scheduler</h1>
+        <div class="admin-controls">
+            <button id="adminLoginBtn" class="button">Admin</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <nav class="tabs" role="tablist">
+            <button class="tab active" data-tab="request" role="tab" aria-selected="true">Request Shift</button>
+            <button class="tab" data-tab="pending" role="tab" aria-selected="false">Pending</button>
+            <button class="tab" data-tab="approved" role="tab" aria-selected="false">Approved</button>
+        </nav>
+
+        <section id="tab-request" class="tab-panel active" role="tabpanel" aria-labelledby="Request Shift">
+            <div class="panel two-col">
+                <form id="requestForm" class="card">
+                    <h2>Request a Shift</h2>
+                    <label>
+                        Name
+                        <input name="name" id="name" type="text" placeholder="Your name" required>
+                    </label>
+                    <label>
+                        Role
+                        <input name="role" id="role" type="text" placeholder="e.g., Barista" required>
+                    </label>
+                    <div class="grid-2">
+                        <label>
+                            Date
+                            <input name="date" id="date" type="date" required>
+                        </label>
+                        <label>
+                            Start Time
+                            <input name="start" id="start" type="time" required>
+                        </label>
+                        <label>
+                            End Time
+                            <input name="end" id="end" type="time" required>
+                        </label>
+                    </div>
+                    <label>
+                        Notes
+                        <textarea name="notes" id="notes" rows="3" placeholder="Optional"></textarea>
+                    </label>
+                    <button type="submit" class="button primary" id="submitRequestBtn">Submit Request</button>
+                    <p id="requestMessage" class="muted"></p>
+                </form>
+
+                <div class="card">
+                    <div class="calendar-header">
+                        <button class="icon-btn" data-cal="req" data-action="prev">◀</button>
+                        <h2 id="calendarTitle-req">Request Calendar</h2>
+                        <button class="icon-btn" data-cal="req" data-action="next">▶</button>
+                    </div>
+                    <div id="calendar-req" class="calendar"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-pending" class="tab-panel" role="tabpanel" aria-labelledby="Pending">
+            <div class="card">
+                <div class="calendar-header">
+                    <button class="icon-btn" data-cal="pending" data-action="prev">◀</button>
+                    <h2 id="calendarTitle-pending">Pending Shifts</h2>
+                    <button class="icon-btn" data-cal="pending" data-action="next">▶</button>
+                </div>
+                <div id="calendar-pending" class="calendar"></div>
+                <p class="muted small">Approve shifts by clicking them (admin only).</p>
+            </div>
+        </section>
+
+        <section id="tab-approved" class="tab-panel" role="tabpanel" aria-labelledby="Approved">
+            <div class="card">
+                <div class="calendar-header">
+                    <button class="icon-btn" data-cal="approved" data-action="prev">◀</button>
+                    <h2 id="calendarTitle-approved">Approved Shifts</h2>
+                    <button class="icon-btn" data-cal="approved" data-action="next">▶</button>
+                </div>
+                <div id="calendar-approved" class="calendar"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="adminModal" class="modal hidden" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <h3>Admin Login</h3>
+            <p class="muted">Enter 4-digit PIN</p>
+            <form id="adminForm">
+                <input id="adminPin" type="password" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="1234" required>
+                <div class="modal-actions">
+                    <button type="submit" class="button primary">Login</button>
+                    <button type="button" class="button" id="closeAdminModal">Cancel</button>
+                </div>
+                <p id="adminMessage" class="muted"></p>
+            </form>
+        </div>
+    </div>
+
+    <template id="shiftItemTemplate">
+        <div class="shift-item"></div>
+    </template>
+
+    <footer class="footer">
+        <span id="statusBar" class="muted">Ready</span>
+    </footer>
+</body>
+</html>
